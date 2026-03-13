@@ -17,7 +17,7 @@ provider "ruckus" {
 }
 
 data "ruckus_zone" "hq" {
-  name = "HQ"
+  name = var.zone
 }
 
 resource "ruckus_wlan" "corp" {
@@ -37,8 +37,8 @@ resource "ruckus_wlan" "corp" {
   }
 
   radio {
-    band             = "5"
-    client_isolation = true
+    band             = var.band
+    client_isolation = var.client_isolation
   }
 
   advanced {

@@ -4,6 +4,10 @@
 
 ---
 
+This was mostly Vibe-Coded. I apologize to any go aficionados who may read this.
+
+---
+
 ## ✨ Features
 
 - **Provider auth** with `serviceTicket` (logon, reuse in query string). [1](https://docs.devnetexperttraining.com/static-docs/Terraform/docs/plugin/framework/acctests.html)  

@@ -4,7 +4,7 @@
 
 ---
 
-This was mostly Vibe-Coded. I apologize to any go aficionados who may read this.
+This was mostly Vibe-Coded. I apologize to any Go aficionados who may read this.
 
 ---
 

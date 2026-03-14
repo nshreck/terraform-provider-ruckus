@@ -7,6 +7,7 @@ terraform {
   }
 }
 provider "ruckus" {
+  host                 = var.controller
   username             = var.username
   password             = var.password
   domain               = var.domain

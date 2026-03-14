@@ -1,21 +1,36 @@
 variable "username" {
   default = "admin"
+  type = string
 }
 variable "password" {
   sensitive = true
+  type = string
 }
-variable "domain" {}
+variable "domain" {
+  type = string
+}
 variable "insecure" {
   default = false
+  type = bool
 }
 variable "psk" {
   sensitive = true
+  type = string
 }
 variable "client_isolation" {
   default = true
+  type = bool
 }
 variable "band" {
   default = "both"
+  type = string
 }
-variable "zone" {}
-variable "ssid" {}
+variable "controller" {
+  type = string
+}
+variable "zone" {
+  type = string
+}
+variable "ssid" {
+  type = string
+}

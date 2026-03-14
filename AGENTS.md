@@ -24,6 +24,7 @@ Key components:
 - **Error Handling**: Check HTTP status in 200-299 range; drain response body on errors. Use `resp.Diagnostics.AddError()` for Terraform errors.
 - **Defaults**: API version defaults to `"v13_1"` for SmartZone 7.1.1; timeout to 30s. Domain optional in login.
 - **Examples**: Reference `examples/basic/main.tf` for provider config and resource usage with nested blocks.
+- **Schema Definition**: Mark sensitive fields with `Sensitive: true` (e.g., passwords, passphrases). Use validators like `stringvalidator.OneOf` for enum values.
 
 ## Integration Points
 - **External API**: Ruckus SmartZone REST API. Verify payloads against controller's OpenAPI at `https://{host}:8443/wsg/apiDoc/openapi`.

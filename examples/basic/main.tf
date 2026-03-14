@@ -6,14 +6,12 @@ terraform {
     }
   }
 }
-
 provider "ruckus" {
-  host                 = var.controller
   username             = var.username
   password             = var.password
   domain               = var.domain
   api_version          = "v13_1"
-  insecure_skip_verify = true
+  insecure_skip_verify = var.insecure
 }
 
 data "ruckus_zone" "hq" {
@@ -27,7 +25,7 @@ resource "ruckus_wlan" "corp" {
 
   security {
     mode        = "wpa2_psk"
-    passphrase  = var.corp_psk
+    passphrase  = var.psk
     encryption  = "ccmp"
   }
 

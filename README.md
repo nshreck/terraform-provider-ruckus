@@ -4,7 +4,7 @@
 
 ---
 
-This is a partially AI generated codebase, as I am still learning Go. I apologize to any Go aficionados who may read this and cringe at my code style. I welcome any contributions to improve the code quality, add features, or fix bugs. Please see the [Contributing](#-contributing) section below.
+This is a partially AI generated codebase, as I am still learning Go. I apologize to any Go aficionados who may read this and cringe at my code style. I welcome any contributions to improve the code quality, add features, or fix bugs. Please see the [Contributing]([#-contributing](https://github.com/nshreck/terraform-provider-ruckus/blob/main/README.md#%E2%80%8D%E2%80%8D-contributing)) section below.
 
 ---
 

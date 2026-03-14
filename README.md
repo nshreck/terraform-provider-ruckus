@@ -1,10 +1,6 @@
 # Terraform Provider for Ruckus SmartZone (v7.1.1)
 
-> A community Terraform provider that manages **Ruckus SmartZone / vSZ** configuration via the public REST API (`/wsg/api/public/{api_version}`) using **serviceTicket** authentication. Targets **SmartZone 7.1.1.0.551** by default, and supports earlier/later API versions via a provider argument. [1](https://developer.hashicorp.com/terraform/plugin/framework/acctests)[2](https://github.com/hashicorp/terraform-plugin-go)
-
----
-
-This is a partially AI generated codebase, as I am still learning Go. I apologize to any Go aficionados who may read this and cringe at my code style. I welcome any contributions to improve the code quality, add features, or fix bugs. Please see the [Contributing](https://github.com/nshreck/terraform-provider-ruckus/blob/main/README.md#%E2%80%8D%E2%80%8D-contributing) section below.
+> A community Terraform provider that manages **Ruckus SmartZone / vSZ** configuration via the public REST API (`/wsg/api/public/{api_version}`) using **serviceTicket** authentication. Targets **SmartZone 7.1.1.0.551** by default, and supports earlier/later API versions via a provider argument. This is a partially AI generated codebase, as I am still learning Go. I apologize to any Go aficionados who may read this and cringe at my code style. I welcome any contributions to improve the code quality, add features, or fix bugs. Please see the [Contributing](https://github.com/nshreck/terraform-provider-ruckus/blob/main/README.md#%E2%80%8D%E2%80%8D-contributing) section below.
 
 ---
 

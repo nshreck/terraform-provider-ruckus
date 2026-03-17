@@ -31,7 +31,7 @@ resource "ruckus_wlan" "corp" {
   }
 
   vlan {
-    access_vlan  = 120
+    access_vlan  = var.vlan
     dynamic_vlan = false
   }
 

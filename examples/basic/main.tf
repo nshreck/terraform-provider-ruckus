@@ -15,14 +15,14 @@ provider "ruckus" {
   insecure_skip_verify = var.insecure
 }
 
-data "ruckus_zone" "hq" {
+data "ruckus_zone" "zone" {
   name = var.zone
 }
 
-resource "ruckus_wlan" "corp" {
+resource "ruckus_wlan" "wlan" {
   zone_id     = data.ruckus_zone.hq.id
   name        = var.ssid
-  ssid        = "${var.ssid}WLAN"
+  ssid        = var.ssid
 
   security {
     mode        = "wpa2_psk"

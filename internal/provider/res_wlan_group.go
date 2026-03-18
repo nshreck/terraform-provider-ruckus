@@ -53,9 +53,9 @@ func (r *WLANGroupResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				Optional:    true,
 			},
 			"members": schema.ListAttribute{
-				Description: "List of WLAN IDs that are members of this group.",
+				Description: "List of WLAN IDs that are members of this group (computed from API).",
 				ElementType: types.StringType,
-				Required:    true,
+				Computed:    true,
 			},
 		},
 	}
@@ -84,13 +84,7 @@ func buildCreateWLANGroupReq(plan *WLANGroupModel) (createWLANGroupReq, error) {
 		req.Description = plan.Description.ValueString()
 	}
 
-	members := make([]wlanGroupMember, 0)
-	for _, m := range plan.Members.Elements() {
-		if str, ok := m.(types.String); ok {
-			members = append(members, wlanGroupMember{ID: str.ValueString()})
-		}
-	}
-	req.Members = members
+	// Note: members are not sent during create/update; they are managed through the WLAN resource
 
 	return req, nil
 }
@@ -314,9 +308,8 @@ func (r *WLANGroupResource) Delete(ctx context.Context, req resource.DeleteReque
 }
 
 type createWLANGroupReq struct {
-	Name        string            `json:"name"`
-	Description string            `json:"description,omitempty"`
-	Members     []wlanGroupMember `json:"members"`
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
 }
 
 type wlanGroupMember struct {

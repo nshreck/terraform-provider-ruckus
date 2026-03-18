@@ -46,8 +46,7 @@ resource "ruckus_wlan" "wlan" {
 }
 
 resource "ruckus_wlan_group" "corp_group" {
-  zone_id = data.ruckus_zone.zone.id
-  name    = "Corporate WLAN Group"
+  zone_id     = data.ruckus_zone.zone.id
+  name        = "Corporate WLAN Group"
   description = "Group containing corporate WLANs"
-  members = [ruckus_wlan.wlan.id]
 }

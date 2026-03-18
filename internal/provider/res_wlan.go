@@ -352,7 +352,7 @@ func (r *WLANResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	}
 	if httpResp.StatusCode < 200 || httpResp.StatusCode > 299 {
 		bodyBytes, _ := io.ReadAll(httpResp.Body)
-		resp.Diagnostics.AddError("read request response out of range", fmt.Sprintf("status %d: %s", httpResp.StatusCode, string(bodyBytes)))
+		resp.Diagnostics.AddError("read request response out of range", fmt.Sprintf("status %d: %s at endpoint: %s", httpResp.StatusCode, string(bodyBytes), endpoint))
 		return
 	}
 

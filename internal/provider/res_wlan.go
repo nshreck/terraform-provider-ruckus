@@ -47,9 +47,7 @@ func buildCreateWLANReq(plan *WLANModel) createWLANReq {
 	if !plan.Description.IsNull() && !plan.Description.IsUnknown() {
 		req.Description = plan.Description.ValueString()
 	}
-	if !plan.GroupID.IsNull() && !plan.GroupID.IsUnknown() {
-		req.GroupID = plan.GroupID.ValueString()
-	}
+	// GroupID is set via separate endpoint
 
 	if plan.Encryption != nil {
 		s := &wlanEncryption{}
@@ -153,6 +151,10 @@ type createWLANResp struct {
 	ID string `json:"id"`
 }
 
+type addMemberReq struct {
+	ID string `json:"id"`
+}
+
 type wlanResponse struct {
 	ID          string          `json:"id"`
 	ZoneID      string          `json:"zoneId,omitempty"`
@@ -213,6 +215,36 @@ func (r *WLANResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 	plan.ID = types.StringValue(cr.ID)
+
+	if !plan.GroupID.IsNull() && !plan.GroupID.IsUnknown() {
+		addEndpoint := fmt.Sprintf("%s/wsg/api/public/%s/rkszones/%s/wlangroups/%s/members?%s",
+			r.client.BaseURL, r.client.APIVersion, plan.ZoneID.ValueString(), plan.GroupID.ValueString(), q.Encode())
+		addPayload := addMemberReq{ID: cr.ID}
+		addBody, _ := json.Marshal(addPayload)
+		addReq, err := http.NewRequestWithContext(ctx, http.MethodPost, addEndpoint, bytes.NewReader(addBody))
+		if err != nil {
+			resp.Diagnostics.AddError("add to group failed", err.Error())
+			return
+		}
+		addReq.Header.Set("Content-Type", "application/json;charset=UTF-8")
+		addResp, err := r.client.HTTP.Do(addReq)
+		if err != nil {
+			resp.Diagnostics.AddError("add to group failed", err.Error())
+			return
+		}
+		defer func() {
+			if cerr := addResp.Body.Close(); cerr != nil {
+				resp.Diagnostics.AddWarning("add response close failed", cerr.Error())
+			}
+		}()
+		if addResp.StatusCode < 200 || addResp.StatusCode > 299 {
+			bodyBytes, _ := io.ReadAll(addResp.Body)
+			resp.Diagnostics.AddError("add to group failed", fmt.Sprintf("status %d: %s", addResp.StatusCode, string(bodyBytes)))
+			return
+		}
+		drainBody(addResp.Body)
+	}
+
 	resp.State.Set(ctx, &plan)
 }
 
@@ -359,6 +391,36 @@ func (r *WLANResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 	drainBody(httpResp.Body)
+
+	if !plan.GroupID.IsNull() && !plan.GroupID.IsUnknown() {
+		addEndpoint := fmt.Sprintf("%s/wsg/api/public/%s/rkszones/%s/wlangroups/%s/members?%s",
+			r.client.BaseURL, r.client.APIVersion, plan.ZoneID.ValueString(), plan.GroupID.ValueString(), q.Encode())
+		addPayload := addMemberReq{ID: plan.ID.ValueString()}
+		addBody, _ := json.Marshal(addPayload)
+		addReq, err := http.NewRequestWithContext(ctx, http.MethodPost, addEndpoint, bytes.NewReader(addBody))
+		if err != nil {
+			resp.Diagnostics.AddError("add to group failed", err.Error())
+			return
+		}
+		addReq.Header.Set("Content-Type", "application/json;charset=UTF-8")
+		addResp, err := r.client.HTTP.Do(addReq)
+		if err != nil {
+			resp.Diagnostics.AddError("add to group failed", err.Error())
+			return
+		}
+		defer func() {
+			if cerr := addResp.Body.Close(); cerr != nil {
+				resp.Diagnostics.AddWarning("add response close failed", cerr.Error())
+			}
+		}()
+		if addResp.StatusCode < 200 || addResp.StatusCode > 299 {
+			bodyBytes, _ := io.ReadAll(addResp.Body)
+			resp.Diagnostics.AddError("add to group failed", fmt.Sprintf("status %d: %s", addResp.StatusCode, string(bodyBytes)))
+			return
+		}
+		drainBody(addResp.Body)
+	}
+
 	resp.State.Set(ctx, &plan)
 }
 

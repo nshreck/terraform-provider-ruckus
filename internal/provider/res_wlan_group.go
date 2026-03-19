@@ -149,6 +149,55 @@ func (r *WLANGroupResource) Create(ctx context.Context, req resource.CreateReque
 	}
 
 	plan.ID = types.StringValue(createResp.ID)
+
+	// Read the created resource to populate computed fields (members)
+	q2 := url.Values{}
+	q2.Set("serviceTicket", r.client.ServiceTicket)
+	readEndpoint := fmt.Sprintf("%s/wsg/api/public/%s/rkszones/%s/wlangroups/%s?%s",
+		r.client.BaseURL, r.client.APIVersion, plan.ZoneID.ValueString(), plan.ID.ValueString(), q2.Encode())
+
+	readReq, err := http.NewRequestWithContext(ctx, http.MethodGet, readEndpoint, nil)
+	if err != nil {
+		resp.Diagnostics.AddError("create failed", fmt.Sprintf("failed to read created resource: %v", err))
+		return
+	}
+
+	readResp, err := r.client.HTTP.Do(readReq)
+	if err != nil {
+		resp.Diagnostics.AddError("create failed", fmt.Sprintf("failed to read created resource: %v", err))
+		return
+	}
+	defer func() {
+		if cerr := readResp.Body.Close(); cerr != nil {
+			resp.Diagnostics.AddWarning("failed to close read response body", cerr.Error())
+		}
+	}()
+
+	if readResp.StatusCode == http.StatusOK {
+		var readRespData readWLANGroupResp
+		if err := json.NewDecoder(readResp.Body).Decode(&readRespData); err != nil {
+			resp.Diagnostics.AddError("create failed", fmt.Sprintf("failed to decode read response: %v", err))
+			return
+		}
+
+		// Update plan with data from read
+		plan.Name = types.StringValue(readRespData.Name)
+		if readRespData.Description != "" {
+			plan.Description = types.StringValue(readRespData.Description)
+		} else {
+			plan.Description = types.StringNull()
+		}
+
+		members := make([]string, 0, len(readRespData.Members))
+		for _, m := range readRespData.Members {
+			members = append(members, m.ID)
+		}
+		plan.Members, _ = types.ListValueFrom(ctx, types.StringType, members)
+	} else {
+		// Fallback: set empty members list if read fails
+		plan.Members, _ = types.ListValueFrom(ctx, types.StringType, []string{})
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 

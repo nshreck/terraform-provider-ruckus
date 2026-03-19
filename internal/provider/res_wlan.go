@@ -33,6 +33,7 @@ type WLANModel struct {
 	Name        types.String `tfsdk:"name"`
 	SSID        types.String `tfsdk:"ssid"`
 	Description types.String `tfsdk:"description"`
+	GroupID     types.String `tfsdk:"group_id"`
 
 	Encryption *WLANEncryptionModel `tfsdk:"encryption"`
 	VLAN       *WLANVLANModel       `tfsdk:"vlan"`
@@ -45,6 +46,9 @@ func buildCreateWLANReq(plan *WLANModel) createWLANReq {
 	}
 	if !plan.Description.IsNull() && !plan.Description.IsUnknown() {
 		req.Description = plan.Description.ValueString()
+	}
+	if !plan.GroupID.IsNull() && !plan.GroupID.IsUnknown() {
+		req.GroupID = plan.GroupID.ValueString()
 	}
 
 	if plan.Encryption != nil {
@@ -87,6 +91,7 @@ func (r *WLANResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			"name":        schema.StringAttribute{Required: true},
 			"ssid":        schema.StringAttribute{Required: true},
 			"description": schema.StringAttribute{Optional: true},
+			"group_id":    schema.StringAttribute{Optional: true},
 		},
 		Blocks: map[string]schema.Block{
 			"encryption": schema.SingleNestedBlock{
@@ -139,6 +144,7 @@ type createWLANReq struct {
 	Name        string          `json:"name"`
 	SSID        string          `json:"ssid"`
 	Description string          `json:"description,omitempty"`
+	GroupID     string          `json:"groupId,omitempty"`
 	Encryption  *wlanEncryption `json:"encryption,omitempty"`
 	VLAN        *wlanVLAN       `json:"vlan,omitempty"`
 }
@@ -153,6 +159,7 @@ type wlanResponse struct {
 	Name        string          `json:"name"`
 	SSID        string          `json:"ssid"`
 	Description string          `json:"description,omitempty"`
+	GroupID     string          `json:"groupId,omitempty"`
 	Encryption  *wlanEncryption `json:"encryption,omitempty"`
 	VLAN        *wlanVLAN       `json:"vlan,omitempty"`
 }
@@ -222,8 +229,8 @@ func (r *WLANResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	q := url.Values{}
 	q.Set("serviceTicket", r.client.ServiceTicket)
-	endpoint := fmt.Sprintf("%s/wsg/api/public/%s/rkszones/%s/wlans/?%s",
-		r.client.BaseURL, r.client.APIVersion, state.ZoneID.ValueString(), q.Encode())
+	endpoint := fmt.Sprintf("%s/wsg/api/public/%s/rkszones/%s/wlans/%s?%s",
+		r.client.BaseURL, r.client.APIVersion, state.ZoneID.ValueString(), state.ID.ValueString(), q.Encode())
 
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
@@ -268,6 +275,11 @@ func (r *WLANResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		state.Description = types.StringValue(out.Description)
 	} else {
 		state.Description = types.StringNull()
+	}
+	if out.GroupID != "" {
+		state.GroupID = types.StringValue(out.GroupID)
+	} else {
+		state.GroupID = types.StringNull()
 	}
 
 	if out.Encryption != nil {

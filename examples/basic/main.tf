@@ -2,7 +2,7 @@ terraform {
   required_providers {
     ruckus = {
       source  = "nshreck/ruckus"
-      version =  ">= 0.0.8"
+      version =  ">= 0.0.12"
     }
   }
 }
@@ -25,6 +25,7 @@ resource "ruckus_wlan" "wlan" {
   zone_id     = data.ruckus_zone.zones[each.value].id
   name        = var.ssid
   ssid        = var.ssid
+  group_id    = ruckus_wlan_group.group[each.value].id
 
   encryption {
     mode        = "WPA2"

@@ -121,18 +121,18 @@ func (d *WLANDS) Configure(_ context.Context, req datasource.ConfigureRequest, _
 }
 
 type wlanListResp struct {
-	List []wlanListItem `json:"list"`
+	TotalCount int            `json:"totalCount"`
+	HasMore    bool           `json:"hasMore"`
+	FirstIndex int            `json:"firstIndex"`
+	List       []wlanListItem `json:"list"`
 }
 
 type wlanListItem struct {
-	ID                  string                   `json:"id"`
-	Name                string                   `json:"name"`
-	SSID                string                   `json:"ssid"`
-	Description         string                   `json:"description,omitempty"`
-	GroupID             string                   `json:"groupId,omitempty"`
-	Encryption          *wlanEncryption          `json:"encryption,omitempty"`
-	VLAN                *wlanVLAN                `json:"vlan,omitempty"`
-	AccessTunnelProfile *wlanAccessTunnelProfile `json:"accessTunnelProfile,omitempty"`
+	ID     string `json:"id"`
+	MvnoID string `json:"mvnoId"`
+	ZoneID string `json:"zoneId"`
+	Name   string `json:"name"`
+	SSID   string `json:"ssid"`
 }
 
 func (d *WLANDS) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -161,47 +161,57 @@ func (d *WLANDS) Read(ctx context.Context, req datasource.ReadRequest, resp *dat
 
 	wlans := make([]WLANDSItem, 0, len(wlr.List))
 	for _, w := range wlr.List {
-		item := WLANDSItem{
-			ID:   types.StringValue(w.ID),
-			Name: types.StringValue(w.Name),
-			SSID: types.StringValue(w.SSID),
+		// Fetch individual WLAN details
+		individualEndpoint := fmt.Sprintf("%s/wsg/api/public/%s/rkszones/%s/wlans/%s?%s",
+			d.client.BaseURL, d.client.APIVersion, state.ZoneID.ValueString(), w.ID, q.Encode())
+
+		var wr wlanResponse
+		if err := doGET(ctx, d.client.HTTP, individualEndpoint, &wr); err != nil {
+			resp.Diagnostics.AddError("read WLAN details failed", err.Error())
+			return
 		}
-		if w.Description != "" {
-			item.Description = types.StringValue(w.Description)
+
+		item := WLANDSItem{
+			ID:   types.StringValue(wr.ID),
+			Name: types.StringValue(wr.Name),
+			SSID: types.StringValue(wr.SSID),
+		}
+		if wr.Description != "" {
+			item.Description = types.StringValue(wr.Description)
 		} else {
 			item.Description = types.StringNull()
 		}
-		if w.GroupID != "" {
-			item.GroupID = types.StringValue(w.GroupID)
+		if wr.GroupID != "" {
+			item.GroupID = types.StringValue(wr.GroupID)
 		} else {
 			item.GroupID = types.StringNull()
 		}
-		if w.Encryption != nil {
+		if wr.Encryption != nil {
 			item.Encryption = &WLANEncryptionModel{}
-			if w.Encryption.Mode != "" {
-				item.Encryption.Mode = types.StringValue(w.Encryption.Mode)
+			if wr.Encryption.Mode != "" {
+				item.Encryption.Mode = types.StringValue(wr.Encryption.Mode)
 			} else {
 				item.Encryption.Mode = types.StringNull()
 			}
-			if w.Encryption.Passphrase != "" {
-				item.Encryption.Passphrase = types.StringValue(w.Encryption.Passphrase)
+			if wr.Encryption.Passphrase != "" {
+				item.Encryption.Passphrase = types.StringValue(wr.Encryption.Passphrase)
 			} else {
 				item.Encryption.Passphrase = types.StringNull()
 			}
-			if w.Encryption.Algorithm != "" {
-				item.Encryption.Algorithm = types.StringValue(w.Encryption.Algorithm)
+			if wr.Encryption.Algorithm != "" {
+				item.Encryption.Algorithm = types.StringValue(wr.Encryption.Algorithm)
 			} else {
 				item.Encryption.Algorithm = types.StringNull()
 			}
 		}
-		if w.VLAN != nil && w.VLAN.AccessVLAN != nil {
+		if wr.VLAN != nil && wr.VLAN.AccessVLAN != nil {
 			item.VLAN = &WLANVLANModel{
-				AccessVLAN: types.Int64Value(int64(*w.VLAN.AccessVLAN)),
+				AccessVLAN: types.Int64Value(int64(*wr.VLAN.AccessVLAN)),
 			}
 		}
-		if w.AccessTunnelProfile != nil {
+		if wr.AccessTunnelProfile != nil {
 			item.AccessTunnelProfile = &WLANAccessTunnelProfileModel{
-				Name: types.StringValue(w.AccessTunnelProfile.Name),
+				Name: types.StringValue(wr.AccessTunnelProfile.Name),
 			}
 		}
 		wlans = append(wlans, item)

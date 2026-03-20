@@ -94,5 +94,7 @@ func (p *ruckusProvider) Resources(_ context.Context) []func() resource.Resource
 func (p *ruckusProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewZoneDataSource,
+		NewWLANGroupDataSource,
+		NewWLANDataSource,
 	}
 }

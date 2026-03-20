@@ -20,6 +20,16 @@ data "ruckus_zone" "zones" {
   name    = each.value
 }
 
+data "ruckus_wlan_groups" "groups" {
+  for_each = toset(var.zones)
+  zone_id  = data.ruckus_zone.zones[each.value].id
+}
+
+data "ruckus_wlans" "wlans" {
+  for_each = toset(var.zones)
+  zone_id  = data.ruckus_zone.zones[each.value].id
+}
+
 resource "ruckus_wlan" "wlan" {
   for_each    = toset(var.zones)
   zone_id     = data.ruckus_zone.zones[each.value].id

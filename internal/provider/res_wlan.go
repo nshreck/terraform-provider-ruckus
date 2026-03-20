@@ -41,8 +41,9 @@ type WLANModel struct {
 
 func buildCreateWLANReq(plan *WLANModel) createWLANReq {
 	req := createWLANReq{
-		Name: plan.Name.ValueString(),
-		SSID: plan.SSID.ValueString(),
+		Name:             plan.Name.ValueString(),
+		SSID:             plan.SSID.ValueString(),
+		AccessTunnelType: "RuckusGRE",
 	}
 	if !plan.Description.IsNull() && !plan.Description.IsUnknown() {
 		req.Description = plan.Description.ValueString()
@@ -139,12 +140,13 @@ type wlanVLAN struct {
 }
 
 type createWLANReq struct {
-	Name        string          `json:"name"`
-	SSID        string          `json:"ssid"`
-	Description string          `json:"description,omitempty"`
-	GroupID     string          `json:"groupId,omitempty"`
-	Encryption  *wlanEncryption `json:"encryption,omitempty"`
-	VLAN        *wlanVLAN       `json:"vlan,omitempty"`
+	Name             string          `json:"name"`
+	SSID             string          `json:"ssid"`
+	Description      string          `json:"description,omitempty"`
+	GroupID          string          `json:"groupId,omitempty"`
+	Encryption       *wlanEncryption `json:"encryption,omitempty"`
+	VLAN             *wlanVLAN       `json:"vlan,omitempty"`
+	AccessTunnelType string          `json:"accessTunnelType,omitempty"`
 }
 
 type wlanID struct {

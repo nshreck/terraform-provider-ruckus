@@ -200,8 +200,8 @@ func (r *WLANGroupResource) Create(ctx context.Context, req resource.CreateReque
 	if len(wlanIds) > 0 {
 		q4 := url.Values{}
 		q4.Set("serviceTicket", r.client.ServiceTicket)
-		listEndpoint := fmt.Sprintf("%s/%s/rkszones/%s/wlangroups/%s?%s",
-			r.client.BaseURL, r.client.APIVersion, plan.ZoneID.ValueString(), plan.ID.ValueString(), q4.Encode())
+		listEndpoint := fmt.Sprintf("%s/%s/rkszones/%s/wlangroups?%s",
+			r.client.BaseURL, r.client.APIVersion, plan.ZoneID.ValueString(), q4.Encode())
 		listReq, err := http.NewRequestWithContext(ctx, http.MethodGet, listEndpoint, nil)
 		if err != nil {
 			resp.Diagnostics.AddError("list groups failed", err.Error())
@@ -260,6 +260,8 @@ func (r *WLANGroupResource) Create(ctx context.Context, req resource.CreateReque
 				}
 				drainBody(removeResp.Body)
 			}
+		} else {
+			resp.Diagnostics.AddError("default group not found", "couldn't find default group to remove WLAN(s) from")
 		}
 	}
 
